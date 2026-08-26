@@ -4,12 +4,20 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Ruthwick Meduri | Computational Genomics",
   description:
-    "PhD researcher in computational genomics — CAGE-seq, regulatory element discovery, and deep learning for gene expression.",
+    "Deciphering transcriptional regulation at base-pair resolution with CAGE, deep representation learning, and functional genomics.",
   keywords: ["computational genomics", "CAGE-seq", "regulatory genomics", "deep learning", "bioinformatics"],
   authors: [{ name: "Ruthwick Meduri" }],
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
   openGraph: {
     title: "Ruthwick Meduri | Computational Genomics",
-    description: "Decoding the language of gene regulation.",
+    description: "Deciphering transcriptional regulation at base-pair resolution with CAGE, deep representation learning, and functional genomics.",
     type: "website",
   },
 };
@@ -18,6 +26,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

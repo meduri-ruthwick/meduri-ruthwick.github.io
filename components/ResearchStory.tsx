@@ -10,79 +10,207 @@ function lerp(a: number, b: number, t: number) {
 // STORY 1 SCENES: Promoter Architecture & CAGE-seq
 // =============================================================
 
-// ── S1 Scene 1: CAGE Data Points Pairing ──────────────────────
+// ── S1 Scene 1: TSS-TSS Pairs in Pan-Promoterome ───────────────
 function S1_Scene1({ progress }: { progress: number }) {
   const t = progress;
 
-  const scattered = [
-    { x: 20, y: 70 }, { x: 38, y: 62 }, { x: 26, y: 36 }, { x: 62, y: 74 },
-    { x: 78, y: 40 }, { x: 52, y: 24 }, { x: 86, y: 64 }, { x: 16, y: 46 },
-    { x: 66, y: 32 }, { x: 34, y: 76 }, { x: 48, y: 54 }, { x: 82, y: 22 },
+  // 4 Genomic Tracks spanning from Locus 1 to Locus n
+  const loci = [
+    {
+      y: 19,
+      label: "Locus 1",
+      tss: [
+        { id: "t1", x: 24, color: "var(--color-primary)", label: "TSS 1" },
+        { id: "t2", x: 64, color: "var(--color-primary)", label: "TSS 2" },
+      ],
+      pair: { from: 24, to: 64, arcY: 8 },
+    },
+    {
+      y: 38,
+      label: "Locus 2",
+      tss: [
+        { id: "t3", x: 32, color: "var(--color-primary)", label: "TSS 3" },
+        { id: "t4", x: 74, color: "var(--color-meta)", label: "TSS 4" },
+      ],
+      pair: { from: 32, to: 74, arcY: 27 },
+    },
+    {
+      y: 57,
+      label: "Locus 3",
+      tss: [
+        { id: "t5", x: 20, color: "var(--color-meta)", label: "TSS 5" },
+        { id: "t6", x: 58, color: "var(--color-primary)", label: "TSS 6" },
+      ],
+      pair: { from: 20, to: 58, arcY: 46 },
+    },
+    {
+      y: 76,
+      label: "... Locus n",
+      tss: [
+        { id: "t7", x: 38, color: "var(--color-primary)", label: "TSS 7" },
+        { id: "t8", x: 72, color: "var(--color-primary)", label: "TSS n" },
+      ],
+      pair: { from: 38, to: 72, arcY: 65 },
+    },
   ];
-  const paired = [
-    { x: 28, y: 60 }, { x: 40, y: 60 }, { x: 28, y: 44 }, { x: 40, y: 44 },
-    { x: 58, y: 60 }, { x: 70, y: 60 }, { x: 58, y: 40 }, { x: 70, y: 40 },
-    { x: 44, y: 26 }, { x: 56, y: 26 }, { x: 76, y: 26 }, { x: 88, y: 26 },
+
+  // Inter-TSS network links across different loci
+  const interLinks = [
+    { x1: 24, y1: 13, x2: 32, y2: 32, cx: 20, cy: 22 },
+    { x1: 64, y1: 13, x2: 74, y2: 32, cx: 77, cy: 22 },
+    { x1: 32, y1: 32, x2: 20, y2: 51, cx: 18, cy: 41 },
+    { x1: 74, y1: 32, x2: 58, y2: 51, cx: 62, cy: 41 },
+    { x1: 20, y1: 51, x2: 38, y2: 70, cx: 21, cy: 60 },
+    { x1: 58, y1: 51, x2: 72, y2: 70, cx: 73, cy: 60 },
+    // Cross-diagonal correlations
+    { x1: 64, y1: 13, x2: 20, y2: 51, cx: 40, cy: 30 },
+    { x1: 32, y1: 32, x2: 72, y2: 70, cx: 55, cy: 50 },
+    { x1: 24, y1: 13, x2: 38, y2: 70, cx: 16, cy: 45 },
   ];
 
   return (
     <svg viewBox="0 0 100 100" className="w-full h-full select-none">
-      {[0, 2, 4, 6, 8, 10].map(i => {
-        const p1 = { x: lerp(scattered[i].x, paired[i].x, t), y: lerp(scattered[i].y, paired[i].y, t) };
-        const p2 = { x: lerp(scattered[i + 1].x, paired[i + 1].x, t), y: lerp(scattered[i + 1].y, paired[i + 1].y, t) };
-        return (
+      {/* 4 Genomic DNA Baseline Tracks */}
+      {loci.map((loc, li) => (
+        <g key={`loc-${li}`}>
           <line
-            key={i}
-            x1={p1.x}
-            y1={p1.y}
-            x2={p2.x}
-            y2={p2.y}
-            stroke="var(--color-primary)"
-            strokeWidth="0.4"
-            opacity={0.15 + t * 0.45}
-            strokeDasharray="1.5 1.5"
+            x1="18"
+            y1={loc.y}
+            x2="90"
+            y2={loc.y}
+            stroke="var(--color-line)"
+            strokeWidth="0.75"
           />
-        );
-      })}
+          <text
+            x="16"
+            y={loc.y + 1}
+            textAnchor="end"
+            fontSize="2.4"
+            fill={li === 3 ? "var(--color-primary)" : "var(--color-meta)"}
+            fontFamily="'JetBrains Mono', monospace"
+            fontWeight={li === 3 ? "600" : "400"}
+          >
+            {loc.label}
+          </text>
+        </g>
+      ))}
 
-      {scattered.map((pt, i) => {
-        const cx = lerp(pt.x, paired[i].x, t);
-        const cy = lerp(pt.y, paired[i].y, t);
-        const isLead = i % 2 === 0;
+      {/* Intra-Locus TSS-TSS Covariance Arcs */}
+      {loci.map((loc, li) => {
+        const arcT = Math.max(0, Math.min(1, (t - 0.1 - li * 0.08) * 2));
         return (
-          <g key={i}>
-            <circle
-              cx={cx}
-              cy={cy}
-              r={2 + Math.sin(t * Math.PI + i) * 0.4}
-              fill={isLead ? "var(--color-primary)" : "var(--color-meta)"}
-              opacity={0.7 + t * 0.25}
+          <g key={`arc-${li}`} opacity={arcT * 0.95}>
+            <path
+              d={`M ${loc.pair.from + 4} ${loc.y - 6} Q ${(loc.pair.from + loc.pair.to) / 2} ${loc.pair.arcY}, ${loc.pair.to + 4} ${loc.y - 6}`}
+              fill="none"
+              stroke="var(--color-primary)"
+              strokeWidth="0.7"
+              strokeDasharray="1.5 1.5"
+              opacity={0.35 + arcT * 0.55}
             />
-            {t > 0.4 && (
-              <circle
-                cx={cx}
-                cy={cy}
-                r={3.5 + Math.sin(t * Math.PI * 2 + i) * 0.5}
-                fill="none"
-                stroke={isLead ? "var(--color-primary)" : "var(--color-meta)"}
-                strokeWidth="0.3"
-                opacity={(t - 0.4) * 0.6}
-              />
-            )}
           </g>
         );
       })}
 
+      {/* Inter-Locus All-TSS Network Bridges (Light interconnectivity) */}
+      {interLinks.map((link, idx) => {
+        const linkT = Math.max(0, Math.min(1, (t - 0.25 - idx * 0.04) * 2));
+        return (
+          <path
+            key={`inter-${idx}`}
+            d={`M ${link.x1 + 3} ${link.y1} Q ${link.cx} ${link.cy}, ${link.x2 + 3} ${link.y2}`}
+            fill="none"
+            stroke="var(--color-primary)"
+            strokeWidth="0.38"
+            strokeDasharray="1 1.2"
+            opacity={linkT * 0.38}
+          />
+        );
+      })}
+
+      {/* Biological TSS Arrow Symbols (_|→) at each promoter locus */}
+      {loci.map((loc, li) =>
+        loc.tss.map((s, si) => {
+          const appearT = Math.max(0, Math.min(1, (t - (li * 0.08 + si * 0.04)) * 2.5));
+          const stemH = 6 * appearT;
+          const arrowW = 5.5 * appearT;
+
+          return (
+            <g key={`tss-${li}-${si}`} opacity={0.25 + appearT * 0.75}>
+              {/* Base peak pulse at TSS coordinate */}
+              <circle
+                cx={s.x}
+                cy={loc.y}
+                r={1.6 + Math.sin(t * Math.PI * 2 + li) * 0.25}
+                fill={s.color}
+                opacity="0.9"
+              />
+              
+              {/* Vertical Step */}
+              <line
+                x1={s.x}
+                y1={loc.y}
+                x2={s.x}
+                y2={loc.y - stemH}
+                stroke={s.color}
+                strokeWidth="1.0"
+                strokeLinecap="square"
+              />
+
+              {/* Horizontal Rightward Transcription Arrow */}
+              {stemH > 2.5 && (
+                <>
+                  <line
+                    x1={s.x}
+                    y1={loc.y - 6}
+                    x2={s.x + arrowW}
+                    y2={loc.y - 6}
+                    stroke={s.color}
+                    strokeWidth="1.0"
+                    strokeLinecap="round"
+                  />
+                  {/* Arrowhead */}
+                  {arrowW > 3.5 && (
+                    <polyline
+                      points={`${s.x + arrowW - 1.8},${loc.y - 7.5} ${s.x + arrowW},${loc.y - 6} ${s.x + arrowW - 1.8},${loc.y - 4.5}`}
+                      fill="none"
+                      stroke={s.color}
+                      strokeWidth="1.0"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  )}
+                </>
+              )}
+
+              {/* TSS Label */}
+              <text
+                x={s.x + 2.8}
+                y={loc.y + 4.2}
+                textAnchor="middle"
+                fontSize="2.2"
+                fill="var(--color-meta)"
+                fontFamily="'JetBrains Mono', monospace"
+                opacity={Math.min(appearT * 1.5, 1)}
+              >
+                {s.label}
+              </text>
+            </g>
+          );
+        })
+      )}
+
+      {/* Caption Tag */}
       <text
         x="50"
-        y="92"
+        y="93.5"
         textAnchor="middle"
-        fontSize="3.5"
+        fontSize="3.2"
         fill="var(--color-meta)"
         fontFamily="'JetBrains Mono', monospace"
         opacity={0.4 + t * 0.6}
       >
-        {t < 0.5 ? "Scattered CAGE Peaks" : "Promoter–Enhancer TSS Pairs"}
+        {t < 0.4 ? "Curated Pan-Promoterome TSSs" : "TSS-TSS pairs in pan-promoterome"}
       </text>
     </svg>
   );
@@ -158,15 +286,16 @@ function S1_Scene2({ progress }: { progress: number }) {
         })
       )}
 
-      {([["12", "Input"], ["32", "Enc"], ["50", "Latent"], ["68", "Dec"], ["88", "Denoised"]] as [string, string][]).map(([x, label]) => (
+      {([["12", "Input"], ["32", "Enc"], ["50", "Latent Z"], ["68", "Dec"], ["88", "Denoised"]] as [string, string][]).map(([x, label]) => (
         <text
           key={label}
           x={Number(x)}
-          y="88"
+          y="90"
           textAnchor="middle"
-          fontSize="3.2"
-          fill="var(--color-meta)"
+          fontSize="3.1"
+          fill={label === "Latent Z" ? "var(--color-primary)" : "var(--color-meta)"}
           fontFamily="'JetBrains Mono', monospace"
+          fontWeight={label === "Latent Z" ? "600" : "400"}
         >
           {label}
         </text>
@@ -175,254 +304,769 @@ function S1_Scene2({ progress }: { progress: number }) {
   );
 }
 
-// ── S1 Scene 3: Clusters Emerging ─────────────────────────────
+// ── S1 Scene 3: Non-Cancer vs Cancer Split Graph Network ──────
 function S1_Scene3({ progress }: { progress: number }) {
   const t = progress;
 
-  const points = Array.from({ length: 30 }, (_, i) => ({
-    sx: 15 + ((i * 37) % 70),
-    sy: 15 + ((i * 47) % 65),
-    tx: [26, 62, 74][i % 3] + (((i * 7) % 18) - 9) * (1 - t * 0.3),
-    ty: [62, 30, 64][i % 3] + (((i * 11) % 14) - 7) * (1 - t * 0.3),
-    c: ["var(--color-primary)", "var(--color-meta)", "var(--color-ink)"][i % 3],
-  }));
-
-  const clusters = [
-    { x: 26, y: 62, label: "Ubiquitous", color: "var(--color-primary)" },
-    { x: 62, y: 30, label: "Tissue-specific", color: "var(--color-meta)" },
-    { x: 74, y: 64, label: "Developmental", color: "var(--color-ink)" },
+  // 1. Non-Cancer Network (Left, Center: 27, 48) - Dense compact core
+  const ncHubs = [
+    { x: 27, y: 48 }, { x: 23, y: 44 }, { x: 31, y: 44 },
+    { x: 22, y: 51 }, { x: 32, y: 51 }, { x: 26, y: 42 },
+    { x: 28, y: 54 }, { x: 23, y: 47 }, { x: 31, y: 48 },
   ];
 
+  const ncSpokes = Array.from({ length: 28 }, (_, i) => {
+    const angle = (i / 28) * Math.PI * 2;
+    const r = 21 + ((i * 7) % 5) - 2;
+    return {
+      x: 27 + Math.cos(angle) * r,
+      y: 48 + Math.sin(angle) * r,
+      h1: i % 9,
+      h2: (i * 2 + 1) % 9,
+    };
+  });
+
+  // 2. Cancer Network (Right, Center: 75, 48) - Elongated / dispersed core
+  const caHubs = [
+    { x: 74, y: 47 }, { x: 67, y: 36 }, { x: 80, y: 34 },
+    { x: 69, y: 57 }, { x: 82, y: 55 }, { x: 83, y: 28 },
+    { x: 71, y: 65 }, { x: 70, y: 50 }, { x: 76, y: 58 },
+  ];
+
+  const caSpokes = Array.from({ length: 28 }, (_, i) => {
+    const angle = (i / 28) * Math.PI * 2;
+    const r = 21 + ((i * 11) % 5) - 2;
+    return {
+      x: 75 + Math.cos(angle) * r,
+      y: 48 + Math.sin(angle) * r,
+      h1: (i * 3) % 9,
+      h2: (i * 2 + 3) % 9,
+    };
+  });
+
   return (
-    <svg viewBox="0 0 100 100" className="w-full h-full select-none">
-      {clusters.map((cl, idx) => (
-        <ellipse
-          key={idx}
-          cx={cl.x}
-          cy={cl.y}
-          rx={16 * t}
-          ry={13 * t}
-          fill="none"
-          stroke={cl.color}
-          strokeWidth="0.3"
-          strokeDasharray="2 2"
-          opacity={t * 0.4}
-        />
-      ))}
-
-      {points.map((pt, i) => (
-        <circle
-          key={i}
-          cx={lerp(pt.sx, pt.tx, t)}
-          cy={lerp(pt.sy, pt.ty, t)}
-          r={1.8}
-          fill={pt.c}
-          opacity={0.8}
-        />
-      ))}
-
-      {clusters.map(({ x, y, label }, idx) => (
+    <svg viewBox="0 0 102 100" className="w-full h-full select-none">
+      {/* ── LEFT SIDE: NON-CANCER (BLUE) ── */}
+      <g opacity={Math.min(t * 1.5, 1)}>
+        {/* Header */}
         <text
-          key={label}
-          x={x}
-          y={idx === 1 ? y - 10 : y + 15}
+          x="27"
+          y="15"
           textAnchor="middle"
-          fontSize="3.6"
+          fontSize="3.4"
+          fill="#1B4F72"
+          fontFamily="'JetBrains Mono', monospace"
+          fontWeight="700"
+        >
+          Non-Cancer
+        </text>
+        <text
+          x="27"
+          y="20"
+          textAnchor="middle"
+          fontSize="2.4"
           fill="var(--color-meta)"
           fontFamily="'JetBrains Mono', monospace"
-          opacity={Math.min(Math.max((t - 0.3) * 1.5, 0), 1)}
         >
-          {label}
+          Dense Epromoter Core
         </text>
-      ))}
+
+        {/* Outer-to-Core Edges */}
+        {ncSpokes.map((sp, i) => (
+          <g key={`nc-e-${i}`}>
+            <line
+              x1={sp.x}
+              y1={sp.y}
+              x2={ncHubs[sp.h1].x}
+              y2={ncHubs[sp.h1].y}
+              stroke="#2E86C1"
+              strokeWidth="0.25"
+              opacity="0.45"
+            />
+            {i % 2 === 0 && (
+              <line
+                x1={sp.x}
+                y1={sp.y}
+                x2={ncHubs[sp.h2].x}
+                y2={ncHubs[sp.h2].y}
+                stroke="#2E86C1"
+                strokeWidth="0.18"
+                opacity="0.32"
+              />
+            )}
+          </g>
+        ))}
+
+        {/* Intra-Core Mesh */}
+        {ncHubs.map((h, i) =>
+          ncHubs.slice(i + 1).map((hNext, j) => (
+            <line
+              key={`nc-hub-e-${i}-${j}`}
+              x1={h.x}
+              y1={h.y}
+              x2={hNext.x}
+              y2={hNext.y}
+              stroke="#2E86C1"
+              strokeWidth="0.4"
+              opacity="0.6"
+            />
+          ))
+        )}
+
+        {/* Peripheral Nodes */}
+        {ncSpokes.map((sp, i) => (
+          <circle
+            key={`nc-sp-${i}`}
+            cx={sp.x}
+            cy={sp.y}
+            r={1.3}
+            fill="#EBF5FB"
+            stroke="#2874A6"
+            strokeWidth="0.4"
+          />
+        ))}
+
+        {/* Core Hub Nodes */}
+        {ncHubs.map((h, i) => (
+          <g key={`nc-hub-${i}`}>
+            <circle
+              cx={h.x}
+              cy={h.y}
+              r={2.2}
+              fill="#D4E6F1"
+              stroke="#1B4F72"
+              strokeWidth="0.6"
+            />
+            <circle
+              cx={h.x}
+              cy={h.y}
+              r={3.0}
+              fill="none"
+              stroke="#1B4F72"
+              strokeWidth="0.25"
+              opacity="0.5"
+            />
+          </g>
+        ))}
+      </g>
+
+      {/* ── CENTER VERTICAL DIVIDER ── */}
+      <line
+        x1="51"
+        y1="10"
+        x2="51"
+        y2="82"
+        stroke="var(--color-line)"
+        strokeWidth="0.6"
+        strokeDasharray="1.5 1.5"
+      />
+      <text
+        x="51"
+        y="48"
+        textAnchor="middle"
+        fontSize="2.4"
+        fill="var(--color-whisper)"
+        fontFamily="'JetBrains Mono', monospace"
+        transform="rotate(-90 51 48)"
+      >
+        VS
+      </text>
+
+      {/* ── RIGHT SIDE: CANCER (RED) ── */}
+      <g opacity={Math.min(t * 1.5, 1)}>
+        {/* Header */}
+        <text
+          x="75"
+          y="15"
+          textAnchor="middle"
+          fontSize="3.4"
+          fill="#922B21"
+          fontFamily="'JetBrains Mono', monospace"
+          fontWeight="700"
+        >
+          Cancer
+        </text>
+        <text
+          x="75"
+          y="20"
+          textAnchor="middle"
+          fontSize="2.4"
+          fill="var(--color-meta)"
+          fontFamily="'JetBrains Mono', monospace"
+        >
+          Disrupted Distal Hubs
+        </text>
+
+        {/* Outer-to-Core Edges */}
+        {caSpokes.map((sp, i) => (
+          <g key={`ca-e-${i}`}>
+            <line
+              x1={sp.x}
+              y1={sp.y}
+              x2={caHubs[sp.h1].x}
+              y2={caHubs[sp.h1].y}
+              stroke="#A93226"
+              strokeWidth="0.25"
+              opacity="0.4"
+            />
+            {i % 2 === 0 && (
+              <line
+                x1={sp.x}
+                y1={sp.y}
+                x2={caHubs[sp.h2].x}
+                y2={caHubs[sp.h2].y}
+                stroke="#A93226"
+                strokeWidth="0.18"
+                opacity="0.28"
+              />
+            )}
+          </g>
+        ))}
+
+        {/* Intra-Core Mesh */}
+        {caHubs.map((h, i) =>
+          caHubs.slice(i + 1).map((hNext, j) => (
+            <line
+              key={`ca-hub-e-${i}-${j}`}
+              x1={h.x}
+              y1={h.y}
+              x2={hNext.x}
+              y2={hNext.y}
+              stroke="#A93226"
+              strokeWidth="0.3"
+              opacity="0.4"
+            />
+          ))
+        )}
+
+        {/* Peripheral Nodes */}
+        {caSpokes.map((sp, i) => (
+          <circle
+            key={`ca-sp-${i}`}
+            cx={sp.x}
+            cy={sp.y}
+            r={1.3}
+            fill="#FDEDEC"
+            stroke="#78281F"
+            strokeWidth="0.4"
+          />
+        ))}
+
+        {/* Dispersed Core Hub Nodes */}
+        {caHubs.map((h, i) => (
+          <g key={`ca-hub-${i}`}>
+            <circle
+              cx={h.x}
+              cy={h.y}
+              r={2.2}
+              fill="#FADBD8"
+              stroke="#922B21"
+              strokeWidth="0.6"
+            />
+            <circle
+              cx={h.x}
+              cy={h.y}
+              r={3.0}
+              fill="none"
+              stroke="#922B21"
+              strokeWidth="0.25"
+              opacity="0.35"
+            />
+          </g>
+        ))}
+      </g>
+
+      {/* Shared Bottom Caption Tag */}
+      <text
+        x="51"
+        y="93"
+        textAnchor="middle"
+        fontSize="3.1"
+        fill="var(--color-meta)"
+        fontFamily="'JetBrains Mono', monospace"
+        opacity="0.9"
+      >
+        TSS Co-Deployment Core Disruption
+      </text>
     </svg>
   );
 }
 
-// ── S1 Scene 4: Core-Covariant Network ────────────────────────
+// ── S1 Scene 4: GO Molecular Function Enrichment Dotplot ──────
 function S1_Scene4({ progress }: { progress: number }) {
   const t = progress;
 
-  const core = [
-    { x: 50, y: 50, label: "TATA",  r: 5.2 },
-    { x: 36, y: 40, label: "Inr",   r: 3.8 },
-    { x: 64, y: 40, label: "DPE",   r: 3.8 },
-    { x: 40, y: 62, label: "BRE",   r: 3.8 },
-    { x: 60, y: 62, label: "MTE",   r: 3.8 },
+  // GO MF Terms (Top: Non-Cancer N•N exclusive; Bottom: Cancer C•C exclusive)
+  const nnTerms = [
+    { label: "DNA-binding TF activity", y: 22, col: 0, r: 3.4, color: "#F39C12" },
+    { label: "RNA Pol II promoter DNA binding", y: 28, col: 0, r: 3.1, color: "#E67E22" },
+    { label: "Sequence-specific dsDNA binding", y: 34, col: 0, r: 2.7, color: "#F1C40F" },
+    { label: "Transcription regulatory region binding", y: 40, col: 0, r: 2.3, color: "#E67E22" },
+    { label: "Proximal promoter specific binding", y: 46, col: 0, r: 2.0, color: "#F39C12" },
   ];
-  const cov = [
-    { x: 18, y: 26, label: "H3K4me3" },
-    { x: 82, y: 24, label: "ATAC" },
-    { x: 14, y: 70, label: "CTCF" },
-    { x: 84, y: 70, label: "YY1" },
-    { x: 50, y: 12, label: "Pol II" },
-    { x: 28, y: 84, label: "p300" },
-    { x: 72, y: 84, label: "BRD4" },
+
+  const ccTerms = [
+    { label: "Molecular transducer activity", y: 56, col: 2, r: 3.5, color: "#C0392B" },
+    { label: "Ion transmembrane transporter", y: 62, col: 2, r: 3.2, color: "#8E44AD" },
+    { label: "Passive transmembrane transporter", y: 68, col: 2, r: 2.9, color: "#2980B9" },
+    { label: "Transmembrane signaling receptor", y: 74, col: 2, r: 3.3, color: "#9B59B6" },
+    { label: "Substrate-specific channel activity", y: 80, col: 2, r: 3.0, color: "#1B4F72" },
   ];
-  const edges = [
-    [0, 5], [1, 5], [2, 5],
-    [0, 6], [2, 6], [3, 7],
-    [0, 8], [1, 9], [2, 9],
-    [3, 10], [4, 11],
-    [0, 1], [0, 2], [0, 3], [0, 4],
+
+  const columns = [
+    { label: "N•N", x: 67, count: "11" },
+    { label: "N•C", x: 76, count: "00" },
+    { label: "C•C", x: 85, count: "33" },
+    { label: "C•N", x: 94, count: "00" },
   ];
-  const all = [...core, ...cov];
 
   return (
-    <svg viewBox="0 0 100 100" className="w-full h-full select-none">
-      {edges.map(([a, b], i) => {
-        const et = Math.max(0, Math.min(1, (t - i * 0.05) * 2));
+    <svg viewBox="0 0 102 100" className="w-full h-full select-none">
+      {/* Top Banner: Total GO MF Term Count */}
+      <rect
+        x="6"
+        y="5"
+        width="90"
+        height="7.5"
+        rx="2"
+        fill="var(--color-line)"
+        opacity="0.5"
+      />
+      <text
+        x="10"
+        y="10"
+        fontSize="2.4"
+        fill="var(--color-ink)"
+        fontFamily="'JetBrains Mono', monospace"
+        fontWeight="600"
+      >
+        Total GO MF count:
+      </text>
+      {columns.map(col => (
+        <text
+          key={`hdr-${col.label}`}
+          x={col.x}
+          y="10"
+          textAnchor="middle"
+          fontSize="2.4"
+          fill="var(--color-ink)"
+          fontFamily="'JetBrains Mono', monospace"
+          fontWeight="700"
+        >
+          {col.count}
+        </text>
+      ))}
+
+      {/* Grid Lines */}
+      {[...nnTerms, ...ccTerms].map((item, i) => (
+        <line
+          key={`grid-${i}`}
+          x1="6"
+          y1={item.y}
+          x2="96"
+          y2={item.y}
+          stroke="var(--color-line)"
+          strokeWidth="0.4"
+          opacity="0.6"
+        />
+      ))}
+
+      {/* Vertical Column Guides */}
+      {columns.map(col => (
+        <line
+          key={`col-line-${col.label}`}
+          x1={col.x}
+          y1="14"
+          x2={col.x}
+          y2="83"
+          stroke="var(--color-line)"
+          strokeWidth="0.3"
+          strokeDasharray="1 1"
+          opacity="0.5"
+        />
+      ))}
+
+      {/* Section Divider between TF and Transmembrane */}
+      <line
+        x1="6"
+        y1="51"
+        x2="96"
+        y2="51"
+        stroke="var(--color-line)"
+        strokeWidth="0.8"
+      />
+
+      {/* Y-Axis Labels: Non-Cancer (TF / Promoter Binding) */}
+      {nnTerms.map((item, i) => (
+        <text
+          key={`nn-lbl-${i}`}
+          x="62"
+          y={item.y + 0.9}
+          textAnchor="end"
+          fontSize="2.05"
+          fill="var(--color-body)"
+          fontFamily="'JetBrains Mono', monospace"
+        >
+          {item.label}
+        </text>
+      ))}
+
+      {/* Y-Axis Labels: Cancer (Transmembrane & Channels) */}
+      {ccTerms.map((item, i) => (
+        <text
+          key={`cc-lbl-${i}`}
+          x="62"
+          y={item.y + 0.9}
+          textAnchor="end"
+          fontSize="2.05"
+          fill="var(--color-body)"
+          fontFamily="'JetBrains Mono', monospace"
+        >
+          {item.label}
+        </text>
+      ))}
+
+      {/* Non-Cancer N•N Enriched Dots (Amber / Gold / Sage) */}
+      {nnTerms.map((item, i) => {
+        const dotT = Math.max(0, Math.min(1, (t - i * 0.08) * 2.2));
+        const cx = columns[item.col].x;
+        const curR = item.r * dotT;
         return (
-          <line
-            key={i}
-            x1={all[a].x}
-            y1={all[a].y}
-            x2={lerp(all[a].x, all[b].x, et)}
-            y2={lerp(all[a].y, all[b].y, et)}
-            stroke="var(--color-line)"
-            strokeWidth="0.45"
-            opacity={0.15 + et * 0.55}
-          />
+          <g key={`nn-dot-${i}`} opacity={dotT}>
+            <circle
+              cx={cx}
+              cy={item.y}
+              r={curR}
+              fill={item.color}
+              stroke="#B7950B"
+              strokeWidth="0.3"
+            />
+            {dotT > 0.6 && (
+              <circle
+                cx={cx}
+                cy={item.y}
+                r={curR + 0.9}
+                fill="none"
+                stroke={item.color}
+                strokeWidth="0.2"
+                opacity="0.5"
+              />
+            )}
+          </g>
         );
       })}
 
-      {cov.map((n, i) => (
-        <g key={`cov${i}`} opacity={Math.min(Math.max((t - 0.1) * 1.5, 0), 1)}>
-          <circle cx={n.x} cy={n.y} r={3.2} fill="var(--color-tile)" stroke="var(--color-line)" strokeWidth="0.6" />
+      {/* Cancer C•C Enriched Dots (Magenta / Purple / Dark Indigo) */}
+      {ccTerms.map((item, i) => {
+        const dotT = Math.max(0, Math.min(1, (t - 0.2 - i * 0.08) * 2.2));
+        const cx = columns[item.col].x;
+        const curR = item.r * dotT;
+        return (
+          <g key={`cc-dot-${i}`} opacity={dotT}>
+            <circle
+              cx={cx}
+              cy={item.y}
+              r={curR}
+              fill={item.color}
+              stroke="#512E5F"
+              strokeWidth="0.3"
+            />
+            {dotT > 0.6 && (
+              <circle
+                cx={cx}
+                cy={item.y}
+                r={curR + 0.9}
+                fill="none"
+                stroke={item.color}
+                strokeWidth="0.2"
+                opacity="0.45"
+              />
+            )}
+          </g>
+        );
+      })}
+
+      {/* X-Axis Column Headers */}
+      {columns.map(col => (
+        <g key={`col-hdr-${col.label}`}>
           <text
-            x={n.x}
-            y={n.y + 6.5}
+            x={col.x}
+            y="87"
             textAnchor="middle"
-            fontSize="2.8"
-            fill="var(--color-meta)"
+            fontSize="2.7"
+            fill={col.label === "N•N" ? "var(--color-primary)" : col.label === "C•C" ? "#922B21" : "var(--color-meta)"}
             fontFamily="'JetBrains Mono', monospace"
+            fontWeight="700"
           >
-            {n.label}
+            {col.label}
           </text>
         </g>
       ))}
 
-      {core.map((n, i) => (
-        <g key={`core${i}`} opacity={Math.min(Math.max(t * 1.5, 0.2), 1)}>
-          <circle
-            cx={n.x}
-            cy={n.y}
-            r={n.r + Math.sin(t * Math.PI * 2 + i) * 0.4}
-            fill="var(--color-primary)"
-            opacity="0.9"
-          />
-          <text
-            x={n.x}
-            y={n.y + n.r + 4.2}
-            textAnchor="middle"
-            fontSize="3.2"
-            fill="var(--color-ink)"
-            fontFamily="'JetBrains Mono', monospace"
-            fontWeight="500"
-          >
-            {n.label}
-          </text>
-        </g>
-      ))}
+      {/* Bottom Category Labels */}
+      <text
+        x="28"
+        y="93"
+        textAnchor="middle"
+        fontSize="2.4"
+        fill="var(--color-primary)"
+        fontFamily="'JetBrains Mono', monospace"
+        fontWeight="600"
+      >
+        ▲ TF & Promoter (N•N)
+      </text>
+      <text
+        x="80"
+        y="93"
+        textAnchor="middle"
+        fontSize="2.4"
+        fill="#922B21"
+        fontFamily="'JetBrains Mono', monospace"
+        fontWeight="600"
+      >
+        ▲ Transmembrane (C•C)
+      </text>
     </svg>
   );
 }
 
-// ── S1 Scene 5: Genome Double Helix ───────────────────────────
+// ── S1 Scene 5: TFBS Enrichment Bubble Plot (YY1 vs CTCF) ─────
 function S1_Scene5({ progress }: { progress: number }) {
   const t = progress;
-  const count = Math.max(2, Math.floor(t * 40));
 
-  const strand1 = Array.from({ length: 40 }, (_, i) => ({
-    x: Number((50 + Math.cos((i / 39) * Math.PI * 4 + Math.PI / 2) * 14).toFixed(2)),
-    y: Number((8 + (i / 39) * 78).toFixed(2)),
-  }));
-  const strand2 = Array.from({ length: 40 }, (_, i) => ({
-    x: Number((50 + Math.cos((i / 39) * Math.PI * 4 + Math.PI / 2 + Math.PI) * 14).toFixed(2)),
-    y: Number((8 + (i / 39) * 78).toFixed(2)),
-  }));
+  // Left: Non-Cancer (N•N) TFs with YY1 and YY2 dominance
+  const nnTFs = [
+    { name: "YY1", x: 16, y: 25, count: "70.4", r: 5.4, logP: "12.4" },
+    { name: "HNF4A", x: 23, y: 64, count: "9.8", r: 2.3, logP: "4.8" },
+    { name: "YY2", x: 30, y: 68, count: "4.2", r: 4.2, logP: "8.6" },
+    { name: "REST", x: 37, y: 69, count: "3.9", r: 2.2, logP: "4.1" },
+    { name: "RXRB", x: 44, y: 71, count: "1.8", r: 1.8, logP: "3.2" },
+  ];
+
+  // Right: Cancer (C•C) TFs with CTCF, KLF5, SP1, JUN dominance
+  const ccTFs = [
+    { name: "CTCF", x: 60, y: 27, count: "30.5", r: 4.8, logP: "4.2" },
+    { name: "KLF5", x: 67, y: 57, count: "8.6", r: 3.8, logP: "3.8" },
+    { name: "SP1", x: 74, y: 60, count: "6.9", r: 4.6, logP: "4.0" },
+    { name: "JUN", x: 81, y: 65, count: "4.7", r: 2.1, logP: "2.3" },
+    { name: "BACH2", x: 88, y: 67, count: "4.1", r: 2.8, logP: "2.9" },
+    { name: "FOXP1", x: 95, y: 69, count: "2.6", r: 3.6, logP: "3.5" },
+  ];
 
   return (
-    <svg viewBox="0 0 100 100" className="w-full h-full select-none">
-      {strand1.slice(0, count).filter((_, i) => i % 3 === 0).map((pt, i) => {
-        const b = strand2[i * 3];
-        if (!b) return null;
-        return (
-          <line
-            key={`bp${i}`}
-            x1={pt.x}
-            y1={pt.y}
-            x2={b.x}
-            y2={b.y}
-            stroke="var(--color-line)"
-            strokeWidth="0.6"
-            opacity={0.8}
-          />
-        );
-      })}
+    <svg viewBox="0 0 102 100" className="w-full h-full select-none">
+      {/* ── LEFT PANEL: NON-CANCER (N•N) ── */}
+      <g>
+        {/* Panel Box */}
+        <rect
+          x="4"
+          y="6"
+          width="44"
+          height="84"
+          fill="none"
+          stroke="var(--color-line)"
+          strokeDasharray="1.5 1.5"
+          strokeWidth="0.5"
+          rx="2"
+        />
 
-      {strand1.slice(0, count).map((pt, i) => {
-        if (i === 0) return null;
-        const prev = strand1[i - 1];
-        return (
-          <line
-            key={`s1${i}`}
-            x1={prev.x}
-            y1={prev.y}
-            x2={pt.x}
-            y2={pt.y}
-            stroke="var(--color-primary)"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            opacity="0.9"
-          />
-        );
-      })}
-
-      {strand2.slice(0, count).map((pt, i) => {
-        if (i === 0) return null;
-        const prev = strand2[i - 1];
-        return (
-          <line
-            key={`s2${i}`}
-            x1={prev.x}
-            y1={prev.y}
-            x2={pt.x}
-            y2={pt.y}
-            stroke="var(--color-meta)"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            opacity="0.75"
-          />
-        );
-      })}
-
-      {t > 0.4 && (
-        <>
-          <rect x="70" y="32" width="22" height="6" fill="var(--color-primary)" opacity={(t - 0.4) * 0.25} rx="1" />
-          <text x="81" y="36.5" textAnchor="middle" fontSize="3.2" fill="var(--color-primary)"
-            fontFamily="'JetBrains Mono', monospace" opacity={Math.min((t - 0.4) * 2, 1)}>BRCA1</text>
-          
-          <rect x="70" y="56" width="22" height="6" fill="var(--color-meta)" opacity={(t - 0.4) * 0.2} rx="1" />
-          <text x="81" y="60.5" textAnchor="middle" fontSize="3.2" fill="var(--color-meta)"
-            fontFamily="'JetBrains Mono', monospace" opacity={Math.min((t - 0.4) * 2, 1)}>TP53</text>
-        </>
-      )}
-
-      {t > 0.75 && (
+        {/* Title */}
         <text
-          x="50"
-          y="95"
+          x="26"
+          y="12"
           textAnchor="middle"
-          fontSize="4.8"
-          fill="var(--color-ink)"
-          fontFamily="var(--font-serif)"
-          fontStyle="italic"
-          opacity={Math.min((t - 0.75) * 4, 1)}
+          fontSize="2.8"
+          fill="#1B4F72"
+          fontFamily="'JetBrains Mono', monospace"
+          fontWeight="700"
         >
-          Explore the work
+          N•N (Non-Cancer)
         </text>
-      )}
+
+        {/* Y-Axis Label & Line */}
+        <line x1="10" y1="18" x2="10" y2="76" stroke="var(--color-line)" strokeWidth="0.6" />
+        <line x1="10" y1="76" x2="47" y2="76" stroke="var(--color-line)" strokeWidth="0.6" />
+        <text
+          x="7"
+          y="47"
+          textAnchor="middle"
+          fontSize="1.9"
+          fill="var(--color-meta)"
+          fontFamily="'JetBrains Mono', monospace"
+          transform="rotate(-90 7 47)"
+        >
+          Mean Count (0–70)
+        </text>
+
+        {/* Ticks & horizontal guidelines */}
+        {[25, 42, 59, 76].map((gy, i) => (
+          <line
+            key={`nn-g-${i}`}
+            x1="10"
+            y1={gy}
+            x2="46"
+            y2={gy}
+            stroke="var(--color-line)"
+            strokeWidth="0.3"
+            opacity="0.4"
+          />
+        ))}
+
+        {/* Non-Cancer Bubble Dots */}
+        {nnTFs.map((item, i) => {
+          const dotT = Math.max(0, Math.min(1, (t - i * 0.08) * 2.2));
+          const curR = item.r * dotT;
+          return (
+            <g key={`nn-tf-${i}`} opacity={dotT}>
+              <circle
+                cx={item.x}
+                cy={item.y}
+                r={curR}
+                fill="#D4E6F1"
+                stroke="#1B4F72"
+                strokeWidth="0.6"
+              />
+              {dotT > 0.6 && (
+                <circle
+                  cx={item.x}
+                  cy={item.y}
+                  r={curR + 0.8}
+                  fill="none"
+                  stroke="#2E86C1"
+                  strokeWidth="0.25"
+                  opacity="0.5"
+                />
+              )}
+              {/* TF Name */}
+              <text
+                x={item.x}
+                y="80"
+                textAnchor="middle"
+                fontSize="2.1"
+                fill={item.name.startsWith("YY") ? "#1B4F72" : "var(--color-body)"}
+                fontFamily="'JetBrains Mono', monospace"
+                fontWeight={item.name.startsWith("YY") ? "700" : "400"}
+                transform={`rotate(-45 ${item.x} 80)`}
+              >
+                {item.name}
+              </text>
+            </g>
+          );
+        })}
+      </g>
+
+      {/* ── RIGHT PANEL: CANCER (C•C) ── */}
+      <g>
+        {/* Panel Box */}
+        <rect
+          x="54"
+          y="6"
+          width="44"
+          height="84"
+          fill="none"
+          stroke="var(--color-line)"
+          strokeDasharray="1.5 1.5"
+          strokeWidth="0.5"
+          rx="2"
+        />
+
+        {/* Title */}
+        <text
+          x="76"
+          y="12"
+          textAnchor="middle"
+          fontSize="2.8"
+          fill="#922B21"
+          fontFamily="'JetBrains Mono', monospace"
+          fontWeight="700"
+        >
+          C•C (Cancer)
+        </text>
+
+        {/* Y-Axis Line */}
+        <line x1="56" y1="18" x2="56" y2="76" stroke="var(--color-line)" strokeWidth="0.6" />
+        <line x1="56" y1="76" x2="97" y2="76" stroke="var(--color-line)" strokeWidth="0.6" />
+        <text
+          x="53"
+          y="47"
+          textAnchor="middle"
+          fontSize="1.9"
+          fill="var(--color-meta)"
+          fontFamily="'JetBrains Mono', monospace"
+          transform="rotate(-90 53 47)"
+        >
+          Mean Count (0–35)
+        </text>
+
+        {/* Ticks & horizontal guidelines */}
+        {[27, 43, 60, 76].map((gy, i) => (
+          <line
+            key={`cc-g-${i}`}
+            x1="56"
+            y1={gy}
+            x2="96"
+            y2={gy}
+            stroke="var(--color-line)"
+            strokeWidth="0.3"
+            opacity="0.4"
+          />
+        ))}
+
+        {/* Cancer Bubble Dots */}
+        {ccTFs.map((item, i) => {
+          const dotT = Math.max(0, Math.min(1, (t - 0.15 - i * 0.08) * 2.2));
+          const curR = item.r * dotT;
+          return (
+            <g key={`cc-tf-${i}`} opacity={dotT}>
+              <circle
+                cx={item.x}
+                cy={item.y}
+                r={curR}
+                fill="#FADBD8"
+                stroke="#922B21"
+                strokeWidth="0.6"
+              />
+              {dotT > 0.6 && (
+                <circle
+                  cx={item.x}
+                  cy={item.y}
+                  r={curR + 0.8}
+                  fill="none"
+                  stroke="#C0392B"
+                  strokeWidth="0.25"
+                  opacity="0.5"
+                />
+              )}
+              {/* TF Name */}
+              <text
+                x={item.x}
+                y="80"
+                textAnchor="middle"
+                fontSize="2.0"
+                fill={item.name === "CTCF" || item.name === "JUN" ? "#922B21" : "var(--color-body)"}
+                fontFamily="'JetBrains Mono', monospace"
+                fontWeight={item.name === "CTCF" || item.name === "JUN" ? "700" : "400"}
+                transform={`rotate(-45 ${item.x} 80)`}
+              >
+                {item.name}
+              </text>
+            </g>
+          );
+        })}
+      </g>
+
+      {/* Shared Bottom Caption */}
+      <text
+        x="51"
+        y="95"
+        textAnchor="middle"
+        fontSize="2.7"
+        fill="var(--color-meta)"
+        fontFamily="'JetBrains Mono', monospace"
+        opacity="0.9"
+      >
+        Selective TFBS drivers (YY1 vs CTCF)
+      </text>
     </svg>
   );
 }
@@ -841,36 +1485,40 @@ const stories = [
       {
         id: "s1-cage",
         mono: "01 · CAGE-seq",
-        title: "Millions of transcription start sites",
-        body: "CAGE-seq maps the precise nucleotide origin of every gene's transcription across hundreds of tissues — each point a moment where biology begins.",
+        title: "Transcription start sites",
+        body: "CAGE-seq maps the precise nucleotide origin of every gene's transcription across hundreds of tissues — each point a moment where biology begins. Using curated TSSs across the pan-promoterome (Satish et al., 2026), we uncover coordinated TSS-TSS deployment pairs.",
         Component: S1_Scene1,
       },
       {
         id: "s1-ae",
         mono: "02 · Deep learning",
-        title: "Signal from noise",
-        body: "A denoising autoencoder learns a compressed latent representation, separating biological signal from technical variation across thousands of samples.",
+        title: "Signal from noise & latent space",
+        body: (
+          <>
+            A denoising autoencoder captures non-linear regulatory patterns in a compressed latent space. Feature vectors are constructed using futile upstream transcription distance <em>d</em>, promoter expression entropy, and CAGE expression scores across thousands of samples to isolate biological covariance from technical noise.
+          </>
+        ),
         Component: S1_Scene2,
       },
       {
         id: "s1-clusters",
-        mono: "03 · Regulatory programs",
-        title: "Structure in transcriptome space",
-        body: "Unsupervised clustering of the latent space reveals three broad classes of promoter activity — ubiquitous housekeeping, tissue-specific, and developmental.",
+        mono: "03 · Network topology & cancer disruption",
+        title: "Structured co-deployment & its disruption in cancer",
+        body: "In non-cancer transcriptomes, TSS co-deployments organize around dense, tightly structured epromoter core hubs that coordinate proximal promoter activity. In cancers, this parsimonic architecture is grossly disrupted — the central core fractures into dispersed, distal hubs with altered network connectivity.",
         Component: S1_Scene3,
       },
       {
         id: "s1-network",
-        mono: "04 · Core-covariant architecture",
-        title: "Promoters and their partners",
-        body: "Core promoter elements co-vary with distal enhancers, TF binding sites, and chromatin marks — revealing a layered regulatory network.",
+        mono: "04 · Functional enrichment & GO analysis",
+        title: "Transcriptional machinery vs transmembrane signaling",
+        body: "Gene Ontology Molecular Function enrichment reveals a striking functional divergence. Non-cancer TSS co-deployments (N•N) are strongly enriched for DNA-binding transcription factors, RNA Pol II promoter binding, and regulatory machinery. In cancer (C•C), this transcriptional enrichment is completely lost, shifting solely toward transmembrane transporters and ion channels.",
         Component: S1_Scene4,
       },
       {
         id: "s1-genome",
-        mono: "05 · Genomic insight",
-        title: "Decoding gene regulation",
-        body: "From raw sequencing to regulatory logic — computational genomics reveals the grammar that drives development, identity, and disease.",
+        mono: "05 · Transcription factor drivers",
+        title: "Selective TF binding drives core-covariant deployment",
+        body: "Differential motif and TFBS analysis reveals that selective transcription factor binding sites are the key determinants driving core-covariant TSS deployment. Non-cancer hubs (N•N) are dominated by structural promoter organizers like YY1 and YY2, whereas cancer hubs (C•C) switch to chromatin remodelers and stress responders like CTCF, KLF5, and JUN.",
         Component: S1_Scene5,
       },
     ],

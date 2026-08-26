@@ -81,8 +81,8 @@ export default function Hero() {
               marginBottom: "2rem",
             }}
           >
-            Decoding gene regulation at single-nucleotide resolution — using CAGE-seq,
-            deep learning, and regulatory genomics to reveal the grammar of transcription.
+            Deciphering transcriptional regulation at base-pair resolution with CAGE,
+            deep representation learning, and functional genomics.
           </p>
 
           {/* Thin rule + affiliation */}
