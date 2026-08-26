@@ -1,0 +1,123 @@
+/* ── Google Fonts ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@import "tailwindcss";
+
+/* ── Theme Tokens ────────────────────────────────────────── */
+@theme {
+  /* Background layers */
+  --color-paper:      #FAFAF8;
+  --color-tile:       #F4F4F0;
+  --color-band:       #F0F0EC;
+
+  /* Text hierarchy */
+  --color-ink:        #111110;
+  --color-body:       #52524E;
+  --color-meta:       #88887E;
+  --color-whisper:    #B8B8B0;
+
+  /* Borders */
+  --color-line:       #E4E4E0;
+
+  /* Single accent — deep forest sage */
+  --color-primary:    #2A6049;
+  --color-primary-hover: #1F4A37;
+
+  /* Fonts */
+  --font-sans:        'Space Mono', 'Courier New', monospace;
+  --font-serif:       'Cormorant Garamond', Georgia, serif;
+  --font-mono:        'JetBrains Mono', 'Space Mono', monospace;
+
+  /* Animations — minimal */
+  --animate-fade-in:    fadeIn 0.6s ease-out both;
+  --animate-fade-up:    fadeUp 0.7s ease-out both;
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* ── Base ───────────────────────────────────────────────────  */
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px; /* Space Mono reads slightly large — normalise */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────  */
+::-webkit-scrollbar         { width: 4px; }
+::-webkit-scrollbar-track   { background: var(--color-paper); }
+::-webkit-scrollbar-thumb   { background: var(--color-line); border-radius: 4px; }
+
+/* ── Utility classes ────────────────────────────────────────  */
+
+/* Prose text colours */
+.text-body   { color: var(--color-body); }
+.text-meta   { color: var(--color-meta); }
+.text-whisper{ color: var(--color-whisper); }
+.text-ink    { color: var(--color-ink); }
+.text-primary{ color: var(--color-primary); }
+
+/* Backgrounds */
+.bg-paper    { background-color: var(--color-paper); }
+.bg-tile     { background-color: var(--color-tile); }
+.bg-band     { background-color: var(--color-band); }
+.bg-primary  { background-color: var(--color-primary); }
+
+/* Borders */
+.border-line { border-color: var(--color-line); }
+
+/* Typography */
+.font-serif  { font-family: var(--font-serif); }
+.font-mono   { font-family: var(--font-mono); }
+
+/* Hover primary */
+.hover-primary { transition: color 0.2s ease; }
+.hover-primary:hover { color: var(--color-primary); }
+
+/* Scientific axis lines on cards */
+.card-ruled {
+  position: relative;
+  isolation: isolate;
+}
+.card-ruled::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--color-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Sticky story viewport */
+@media (min-width: 1024px) {
+  .story-pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+}
+
+/* Publication / talk card */
+.pub-card {
+  border-top: 1px solid var(--color-line);
+  padding-top: 1.5rem;
+  transition: opacity 0.2s ease;
+}
+.pub-card:hover { opacity: 0.8; }
