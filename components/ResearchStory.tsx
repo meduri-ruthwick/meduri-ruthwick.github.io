@@ -1075,314 +1075,162 @@ function S1_Scene5({ progress }: { progress: number }) {
 // STORY 2 SCENES: Chromatin Accessibility, TFBSs & Evolution (105 Species)
 // =============================================================
 
-// ── S2 Scene 1: Chromatin Accessibility & Nucleosome Unwinding ──
+// ── S2 Scene 1: ATAC-seq & Hyperactive Tn5 Transposase ────────
 function S2_Scene1({ progress }: { progress: number }) {
   const t = progress;
 
-  // Nucleosome positions with unwinding in the center
+  // Nucleosomes flanking an accessible open chromatin region
   const nucleosomes = [
-    { x: 18, y: 64, open: false },
-    { x: 34, y: lerp(64, 76, t), open: true },
-    { x: 66, y: lerp(64, 76, t), open: true },
-    { x: 82, y: 64, open: false },
+    { x: 15, y: 62, label: "H3" },
+    { x: 27, y: 62, label: "H4" },
+    { x: 73, y: 62, label: "H2A" },
+    { x: 85, y: 62, label: "H2B" },
   ];
 
+  const tn5Y = lerp(16, 44, Math.min(t * 1.8, 1));
+  const cutProgress = Math.max(0, Math.min(1, (t - 0.4) * 2));
+
   return (
-    <svg viewBox="0 0 100 100" className="w-full h-full select-none">
+    <svg viewBox="0 0 102 100" className="w-full h-full select-none">
       {/* Baseline DNA Track */}
-      <path
-        d="M 6 64 Q 25 64 35 64 Q 50 64 65 64 Q 75 64 94 64"
-        fill="none"
-        stroke="var(--color-line)"
-        strokeWidth="0.8"
-      />
+      <line x1="6" y1="62" x2="96" y2="62" stroke="var(--color-line)" strokeWidth="1.0" />
 
-      {/* Accessible Chromatin Peak (ATAC-seq signal rise) */}
-      <path
-        d={`M 26 64 C 38 64, 40 ${64 - t * 40}, 50 ${64 - t * 44} C 60 ${64 - t * 40}, 62 64, 74 64 Z`}
-        fill="var(--color-primary)"
-        opacity={0.15 + t * 0.25}
-      />
-      <path
-        d={`M 26 64 C 38 64, 40 ${64 - t * 40}, 50 ${64 - t * 44} C 60 ${64 - t * 40}, 62 64, 74 64`}
-        fill="none"
-        stroke="var(--color-primary)"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-
-      {/* Nucleosome Octamers (beads) */}
+      {/* Flanking Nucleosome Octamers (Histone core beads) */}
       {nucleosomes.map((n, i) => (
-        <g key={i}>
+        <g key={`nuc-${i}`}>
+          {/* Wrapped DNA loop */}
+          <ellipse
+            cx={n.x}
+            cy={n.y}
+            rx="5.5"
+            ry="6.5"
+            fill="none"
+            stroke="var(--color-meta)"
+            strokeWidth="0.8"
+            strokeDasharray="2 1.5"
+            opacity="0.6"
+          />
+          {/* Histone Bead */}
           <circle
             cx={n.x}
             cy={n.y}
-            r={n.open ? lerp(5.5, 4.2, t) : 5.5}
-            fill={n.open ? "var(--color-tile)" : "var(--color-meta)"}
+            r="4.2"
+            fill="var(--color-tile)"
             stroke="var(--color-line)"
             strokeWidth="0.8"
-            opacity={n.open ? 0.6 : 0.85}
           />
           <text
             x={n.x}
-            y={n.y + 1.2}
+            y={n.y + 1}
             textAnchor="middle"
-            fontSize="2.4"
-            fill="var(--color-ink)"
+            fontSize="2.2"
+            fill="var(--color-meta)"
             fontFamily="'JetBrains Mono', monospace"
+            fontWeight="500"
           >
-            H3
+            {n.label}
           </text>
         </g>
       ))}
 
-      {/* Peak callout label */}
-      {t > 0.4 && (
-        <g opacity={Math.min((t - 0.4) * 2, 1)}>
-          <line x1="50" y1={64 - t * 44} x2="50" y2="12" stroke="var(--color-primary)" strokeWidth="0.4" strokeDasharray="1.5 1.5" />
-          <text x="50" y="10" textAnchor="middle" fontSize="3.4" fill="var(--color-primary)" fontFamily="'JetBrains Mono', monospace" fontWeight="600">
-            Open Chromatin Region
-          </text>
-          <text x="50" y="88" textAnchor="middle" fontSize="3.0" fill="var(--color-meta)" fontFamily="'JetBrains Mono', monospace">
-            ATAC-seq / DNase-I Sensitivity
-          </text>
-        </g>
-      )}
-    </svg>
-  );
-}
-
-// ── S2 Scene 2: Transcription Factor Binding Sites (TFBSs) ─────
-function S2_Scene2({ progress }: { progress: number }) {
-  const t = progress;
-
-  const motifs = [
-    { x: 26, name: "CTCF", color: "var(--color-primary)", offset: 0 },
-    { x: 50, name: "FOXA1", color: "var(--color-primary)", offset: 0.2 },
-    { x: 74, name: "GATA3", color: "var(--color-meta)", offset: 0.4 },
-  ];
-
-  return (
-    <svg viewBox="0 0 100 100" className="w-full h-full select-none">
-      {/* Genomic DNA Sequence Line */}
-      <line x1="10" y1="62" x2="90" y2="62" stroke="var(--color-line)" strokeWidth="1.2" />
-
-      {/* Motif Consensus Base Rungs */}
-      {Array.from({ length: 28 }, (_, i) => {
-        const x = 14 + i * 2.65;
-        const inMotif = (x > 22 && x < 30) || (x > 45 && x < 55) || (x > 69 && x < 79);
-        return (
-          <g key={i}>
-            <line
-              x1={x}
-              y1="57"
-              x2={x}
-              y2="67"
-              stroke={inMotif ? "var(--color-primary)" : "var(--color-line)"}
-              strokeWidth={inMotif ? "0.8" : "0.4"}
-              opacity={inMotif ? 0.9 : 0.4}
-            />
-          </g>
-        );
-      })}
-
-      {/* Transcription Factor Proteins Docking */}
-      {motifs.map((m, i) => {
-        const mt = Math.max(0, Math.min(1, (t - m.offset) * 2));
-        const py = lerp(18, 48, mt);
-        return (
-          <g key={i} opacity={0.2 + mt * 0.8}>
-            {/* Docking guide */}
-            {mt > 0.5 && (
-              <line x1={m.x} y1={py + 6} x2={m.x} y2="60" stroke={m.color} strokeWidth="0.4" strokeDasharray="1 1" />
-            )}
-            {/* TF Protein Blob */}
-            <ellipse
-              cx={m.x}
-              cy={py}
-              rx="7.5"
-              ry="5.5"
-              fill={m.color}
-              opacity={0.85}
-            />
-            <text
-              x={m.x}
-              y={py + 1.2}
-              textAnchor="middle"
-              fontSize="2.8"
-              fill="#ffffff"
-              fontFamily="'JetBrains Mono', monospace"
-              fontWeight="600"
-            >
-              {m.name}
-            </text>
-            <text
-              x={m.x}
-              y="77"
-              textAnchor="middle"
-              fontSize="2.6"
-              fill="var(--color-meta)"
-              fontFamily="'JetBrains Mono', monospace"
-              opacity={mt}
-            >
-              Motif #{i + 1}
-            </text>
-          </g>
-        );
-      })}
-
-      {/* Footprint annotation */}
-      <text
-        x="50"
-        y="92"
-        textAnchor="middle"
-        fontSize="3.2"
-        fill="var(--color-meta)"
-        fontFamily="'JetBrains Mono', monospace"
-      >
-        {t < 0.6 ? "Scanning TFBS consensus motifs..." : "High-affinity TF binding occupancy"}
-      </text>
-    </svg>
-  );
-}
-
-// ── S2 Scene 3: Random Forest Machine Learning Ensemble ───────
-function S2_Scene3({ progress }: { progress: number }) {
-  const t = progress;
-
-  // 3 Decision trees representing Random Forest ensemble
-  const trees = [
-    { rootX: 24, label: "Tree 1 (Accessibility)" },
-    { rootX: 50, label: "Tree 2 (TFBS Count)" },
-    { rootX: 76, label: "Tree 3 (Sequence Context)" },
-  ];
-
-  return (
-    <svg viewBox="0 0 100 100" className="w-full h-full select-none">
-      {trees.map((tree, tidx) => {
-        const treeT = Math.max(0, Math.min(1, (t - tidx * 0.12) * 2));
-        const rx = tree.rootX;
-        return (
-          <g key={tidx} opacity={0.25 + treeT * 0.75}>
-            {/* Root node */}
-            <circle cx={rx} cy="22" r="3.2" fill="var(--color-primary)" opacity="0.9" />
-
-            {/* Level 1 branches */}
-            <line x1={rx} y1="22" x2={rx - 7} y2="38" stroke="var(--color-line)" strokeWidth="0.6" />
-            <line x1={rx} y1="22" x2={rx + 7} y2="38" stroke="var(--color-line)" strokeWidth="0.6" />
-            <circle cx={rx - 7} cy="38" r="2.4" fill="var(--color-meta)" />
-            <circle cx={rx + 7} cy="38" r="2.4" fill="var(--color-meta)" />
-
-            {/* Level 2 leaf nodes */}
-            {treeT > 0.4 && (
-              <>
-                <line x1={rx - 7} y1="38" x2={rx - 10} y2="52" stroke="var(--color-line)" strokeWidth="0.4" />
-                <line x1={rx - 7} y1="38" x2={rx - 4} y2="52" stroke="var(--color-line)" strokeWidth="0.4" />
-                <line x1={rx + 7} y1="38" x2={rx + 4} y2="52" stroke="var(--color-line)" strokeWidth="0.4" />
-                <line x1={rx + 7} y1="38" x2={rx + 10} y2="52" stroke="var(--color-line)" strokeWidth="0.4" />
-                
-                <rect x={rx - 12} y="51" width="3.8" height="3" fill="var(--color-primary)" rx="0.5" />
-                <rect x={rx - 6} y="51" width="3.8" height="3" fill="var(--color-line)" rx="0.5" />
-                <rect x={rx + 2} y="51" width="3.8" height="3" fill="var(--color-line)" rx="0.5" />
-                <rect x={rx + 8} y="51" width="3.8" height="3" fill="var(--color-primary)" rx="0.5" />
-              </>
-            )}
-          </g>
-        );
-      })}
-
-      {/* Ensemble Voting Bar */}
-      {t > 0.5 && (
-        <g opacity={Math.min((t - 0.5) * 2.2, 1)}>
-          <line x1="15" y1="68" x2="85" y2="68" stroke="var(--color-line)" strokeWidth="0.5" />
-          <rect x="22" y="74" width="56" height="7" fill="var(--color-tile)" stroke="var(--color-line)" strokeWidth="0.5" rx="1.5" />
-          <rect x="22" y="74" width={56 * Math.min(1, (t - 0.5) * 2)} height="7" fill="var(--color-primary)" opacity="0.85" rx="1.5" />
-          <text x="50" y="79" textAnchor="middle" fontSize="3.0" fill="#ffffff" fontFamily="'JetBrains Mono', monospace" fontWeight="600">
-            Random Forest Ensemble Prediction
-          </text>
-        </g>
-      )}
-
-      <text
-        x="50"
-        y="93"
-        textAnchor="middle"
-        fontSize="3.2"
-        fill="var(--color-meta)"
-        fontFamily="'JetBrains Mono', monospace"
-      >
-        Feature Importance & Multi-Tree Classification
-      </text>
-    </svg>
-  );
-}
-
-// ── S2 Scene 4: Evolutionary Conservation across 105 Species ──
-function S2_Scene4({ progress }: { progress: number }) {
-  const t = progress;
-
-  // Phylogenetic tree branches
-  const speciesList = [
-    { name: "H. sapiens", y: 18, conserved: true },
-    { name: "P. troglodytes", y: 28, conserved: true },
-    { name: "M. mulatta", y: 38, conserved: true },
-    { name: "M. musculus", y: 48, conserved: true },
-    { name: "C. familiaris", y: 58, conserved: true },
-    { name: "B. taurus", y: 68, conserved: true },
-    { name: "... 105 Species", y: 78, conserved: false },
-  ];
-
-  return (
-    <svg viewBox="0 0 100 100" className="w-full h-full select-none">
-      {/* Phylogenetic Tree Backbone */}
-      <path
-        d="M 12 48 H 22 V 28 H 32 V 18 H 42 M 32 28 H 42 M 22 48 V 68 H 32 V 58 H 42 M 32 68 H 42 M 12 48 V 78 H 42"
-        fill="none"
-        stroke="var(--color-line)"
-        strokeWidth="0.7"
+      {/* Open / Accessible Nucleosome-Free Region Highlight */}
+      <rect
+        x="34"
+        y="58"
+        width="34"
+        height="8"
+        fill="var(--color-primary)"
+        opacity="0.08"
+        rx="2"
       />
+      <text
+        x="50"
+        y="73"
+        textAnchor="middle"
+        fontSize="2.5"
+        fill="var(--color-primary)"
+        fontFamily="'JetBrains Mono', monospace"
+        fontWeight="600"
+      >
+        Open Chromatin (NFR)
+      </text>
 
-      {/* Species Nodes & Alignment Blocks */}
-      {speciesList.map((sp, idx) => {
-        const rowT = Math.max(0, Math.min(1, (t - idx * 0.08) * 2));
-        return (
-          <g key={idx} opacity={0.2 + rowT * 0.8}>
-            {/* Species label */}
-            <text
-              x="45"
-              y={sp.y + 1}
-              fontSize="2.8"
-              fill={idx === 6 ? "var(--color-primary)" : "var(--color-ink)"}
-              fontFamily="'JetBrains Mono', monospace"
-              fontWeight={idx === 0 ? "600" : "400"}
-            >
-              {sp.name}
-            </text>
+      {/* Hyperactive Tn5 Transposase Homodimer Complex */}
+      <g transform={`translate(0, ${tn5Y - 44})`} opacity={Math.min(t * 1.5, 1)}>
+        {/* Left Subunit */}
+        <path
+          d="M 44 40 C 38 34, 38 48, 45 50 C 48 51, 49 46, 47 43 Z"
+          fill="var(--color-primary)"
+          stroke="#1F4A37"
+          strokeWidth="0.8"
+          opacity="0.9"
+        />
+        {/* Right Subunit */}
+        <path
+          d="M 56 40 C 62 34, 62 48, 55 50 C 52 51, 51 46, 53 43 Z"
+          fill="#D4AC0D"
+          stroke="#B7950B"
+          strokeWidth="0.8"
+          opacity="0.9"
+        />
+        {/* Interlocking Catalytic Core */}
+        <ellipse cx="50" cy="45" rx="3.5" ry="3" fill="#ffffff" stroke="var(--color-ink)" strokeWidth="0.6" />
+        <text
+          x="50"
+          y="46"
+          textAnchor="middle"
+          fontSize="2.2"
+          fill="var(--color-ink)"
+          fontFamily="'JetBrains Mono', monospace"
+          fontWeight="700"
+        >
+          Tn5
+        </text>
 
-            {/* Conserved synteny bar */}
-            <rect
-              x="74"
-              y={sp.y - 2.5}
-              width={lerp(4, 18, rowT)}
-              height="4"
-              fill={sp.conserved ? "var(--color-primary)" : "var(--color-meta)"}
-              opacity={0.8}
-              rx="0.6"
-            />
-          </g>
-        );
-      })}
+        {/* Ligation Sequencing Adapters */}
+        <g opacity={cutProgress}>
+          {/* Adapter 1 */}
+          <path d="M 40 46 L 33 40" stroke="#E67E22" strokeWidth="1.2" strokeLinecap="round" />
+          <rect x="25" y="36" width="9" height="4" fill="#E67E22" rx="0.8" />
+          <text x="29.5" y="39" textAnchor="middle" fontSize="1.8" fill="#ffffff" fontFamily="'JetBrains Mono', monospace" fontWeight="600">
+            Ad 1
+          </text>
 
-      {/* Conservation score (phyloP) ribbon */}
-      {t > 0.6 && (
-        <g opacity={Math.min((t - 0.6) * 2.5, 1)}>
-          <line x1="74" y1="12" x2="74" y2="85" stroke="var(--color-primary)" strokeWidth="0.4" strokeDasharray="1 1" />
-          <text x="83" y="10" textAnchor="middle" fontSize="2.7" fill="var(--color-primary)" fontFamily="'JetBrains Mono', monospace" fontWeight="600">
-            phyloP Score
+          {/* Adapter 2 */}
+          <path d="M 60 46 L 67 40" stroke="#2980B9" strokeWidth="1.2" strokeLinecap="round" />
+          <rect x="66" y="36" width="9" height="4" fill="#2980B9" rx="0.8" />
+          <text x="70.5" y="39" textAnchor="middle" fontSize="1.8" fill="#ffffff" fontFamily="'JetBrains Mono', monospace" fontWeight="600">
+            Ad 2
+          </text>
+        </g>
+      </g>
+
+      {/* Cleavage Spark / Cut indicator */}
+      {cutProgress > 0.3 && (
+        <g opacity={cutProgress}>
+          <line x1="47" y1="58" x2="49" y2="66" stroke="#E74C3C" strokeWidth="1.0" strokeDasharray="1 1" />
+          <line x1="53" y1="58" x2="51" y2="66" stroke="#E74C3C" strokeWidth="1.0" strokeDasharray="1 1" />
+          <circle cx="50" cy="62" r="1.4" fill="#E74C3C" />
+        </g>
+      )}
+
+      {/* ATAC Peak Signal Envelope above Tn5 */}
+      {t > 0.5 && (
+        <g opacity={Math.min((t - 0.5) * 2, 1)}>
+          <path
+            d="M 28 32 C 38 32, 42 15, 50 14 C 58 15, 62 32, 72 32"
+            fill="none"
+            stroke="var(--color-primary)"
+            strokeWidth="1.0"
+            strokeDasharray="1.5 1.5"
+          />
+          <text x="50" y="11" textAnchor="middle" fontSize="2.8" fill="var(--color-primary)" fontFamily="'JetBrains Mono', monospace" fontWeight="600">
+            ATAC Peak Summit
           </text>
         </g>
       )}
 
+      {/* Bottom Caption */}
       <text
         x="50"
         y="93"
@@ -1391,83 +1239,399 @@ function S2_Scene4({ progress }: { progress: number }) {
         fill="var(--color-meta)"
         fontFamily="'JetBrains Mono', monospace"
       >
-        Evolutionary Conservation across 105 Vertebrate Species
+        Hyperactive Tn5 transposase cutting accessible chromatin
       </text>
     </svg>
   );
 }
 
-// ── S2 Scene 5: Evolutionary Insights & Regulatory Grammar ─────
-function S2_Scene5({ progress }: { progress: number }) {
+// ── S2 Scene 2: Feature Engineering & Random Forest Classifier 
+function S2_Scene2({ progress }: { progress: number }) {
   const t = progress;
 
-  // Syntenic regulatory grammar blocks
-  const blocks = [
-    { x: 18, label: "Core Promoter", w: 18, c: "var(--color-primary)" },
-    { x: 42, label: "TFBS Cluster",  w: 22, c: "var(--color-primary)" },
-    { x: 70, label: "Enhancer",      w: 16, c: "var(--color-meta)" },
+  // 3 Key Sequence Features
+  const features = [
+    { label: "1. TFBS Density", val: "High Binding Occ.", c: "var(--color-primary)", y: 22 },
+    { label: "2. GC Richness (%)", val: "GC% > 60%", c: "#D4AC0D", y: 40 },
+    { label: "3. GC Skew (G-C)/(G+C)", val: "Promoter Skew", c: "#2980B9", y: 58 },
   ];
 
   return (
-    <svg viewBox="0 0 100 100" className="w-full h-full select-none">
-      {/* Ancestral to Modern Genome Flow */}
-      <line x1="12" y1="28" x2="88" y2="28" stroke="var(--color-line)" strokeWidth="0.6" />
-      <text x="14" y="24" fontSize="2.8" fill="var(--color-meta)" fontFamily="'JetBrains Mono', monospace">
-        Ancestral State (105 Species Alignment)
-      </text>
+    <svg viewBox="0 0 102 100" className="w-full h-full select-none">
+      {/* Left Box: Sequence Features Input Matrix */}
+      <g>
+        <rect x="5" y="10" width="40" height="64" fill="var(--color-tile)" stroke="var(--color-line)" strokeWidth="0.6" rx="2" />
+        <text x="25" y="16" textAnchor="middle" fontSize="2.5" fill="var(--color-ink)" fontFamily="'JetBrains Mono', monospace" fontWeight="700">
+          Sequence Features
+        </text>
 
-      <line x1="12" y1="62" x2="88" y2="62" stroke="var(--color-primary)" strokeWidth="0.8" />
-      <text x="14" y="58" fontSize="2.8" fill="var(--color-primary)" fontFamily="'JetBrains Mono', monospace" fontWeight="600">
-        Modern Human Genome (hg38)
-      </text>
+        {features.map((feat, i) => {
+          const rowT = Math.max(0, Math.min(1, (t - i * 0.1) * 2));
+          return (
+            <g key={`feat-${i}`} opacity={0.3 + rowT * 0.7}>
+              {/* Feature label */}
+              <text x="9" y={feat.y + 2} fontSize="2.1" fill="var(--color-body)" fontFamily="'JetBrains Mono', monospace">
+                {feat.label}
+              </text>
+              {/* Feature Value Pill */}
+              <rect x="9" y={feat.y + 4.5} width="32" height="6.5" fill="var(--color-paper)" stroke={feat.c} strokeWidth="0.5" rx="1.2" />
+              <text x="25" y={feat.y + 8.8} textAnchor="middle" fontSize="2.0" fill={feat.c} fontFamily="'JetBrains Mono', monospace" fontWeight="600">
+                {feat.val}
+              </text>
+            </g>
+          );
+        })}
+      </g>
 
-      {/* Syntenic connecting bridges */}
-      {blocks.map((b, i) => {
-        const bt = Math.max(0, Math.min(1, (t - i * 0.15) * 2));
+      {/* Center Flow Connectors */}
+      {[25, 43, 61].map((fy, i) => (
+        <path
+          key={`arr-${i}`}
+          d={`M 45 ${fy} L 55 ${fy}`}
+          stroke="var(--color-primary)"
+          strokeWidth="0.8"
+          strokeDasharray="1.5 1.5"
+          opacity={Math.min(t * 1.5, 0.8)}
+        />
+      ))}
+
+      {/* Right Box: Random Forest Classifier Ensemble */}
+      <g opacity={Math.min(t * 1.4, 1)}>
+        <rect x="55" y="10" width="42" height="64" fill="var(--color-tile)" stroke="var(--color-line)" strokeWidth="0.6" rx="2" />
+        <text x="76" y="16" textAnchor="middle" fontSize="2.5" fill="var(--color-primary)" fontFamily="'JetBrains Mono', monospace" fontWeight="700">
+          Random Forest
+        </text>
+
+        {/* 3 Decision Tree Mini-Ensembles */}
+        {[
+          { x: 63, label: "Tree 1" },
+          { x: 76, label: "Tree 2" },
+          { x: 89, label: "Tree N" },
+        ].map((tree, tidx) => (
+          <g key={`rf-${tidx}`}>
+            {/* Root Node */}
+            <circle cx={tree.x} cy="26" r="2.2" fill="var(--color-primary)" />
+            {/* Branches */}
+            <line x1={tree.x} y1="26" x2={tree.x - 4} y2="36" stroke="var(--color-line)" strokeWidth="0.5" />
+            <line x1={tree.x} y1="26" x2={tree.x + 4} y2="36" stroke="var(--color-line)" strokeWidth="0.5" />
+            <circle cx={tree.x - 4} cy="36" r="1.6" fill="var(--color-meta)" />
+            <circle cx={tree.x + 4} cy="36" r="1.6" fill="var(--color-meta)" />
+
+            {/* Leaves */}
+            <line x1={tree.x - 4} y1="36" x2={tree.x - 5} y2="45" stroke="var(--color-line)" strokeWidth="0.4" />
+            <line x1={tree.x - 4} y1="36" x2={tree.x - 2} y2="45" stroke="var(--color-line)" strokeWidth="0.4" />
+            <line x1={tree.x + 4} y1="36" x2={tree.x + 2} y2="45" stroke="var(--color-line)" strokeWidth="0.4" />
+            <line x1={tree.x + 4} y1="36" x2={tree.x + 5} y2="45" stroke="var(--color-line)" strokeWidth="0.4" />
+            
+            <rect x={tree.x - 6} y="44.5" width="2" height="2" fill="var(--color-primary)" rx="0.3" />
+            <rect x={tree.x - 3} y="44.5" width="2" height="2" fill="var(--color-line)" rx="0.3" />
+            <rect x={tree.x + 1} y="44.5" width="2" height="2" fill="var(--color-line)" rx="0.3" />
+            <rect x={tree.x + 4} y="44.5" width="2" height="2" fill="var(--color-primary)" rx="0.3" />
+
+            <text x={tree.x} y="53" textAnchor="middle" fontSize="1.8" fill="var(--color-meta)" fontFamily="'JetBrains Mono', monospace">
+              {tree.label}
+            </text>
+          </g>
+        ))}
+
+        {/* Prediction Ensemble Majority Vote */}
+        <rect x="59" y="60" width="34" height="9" fill="var(--color-primary)" rx="1.5" />
+        <text x="76" y="65.8" textAnchor="middle" fontSize="2.3" fill="#ffffff" fontFamily="'JetBrains Mono', monospace" fontWeight="700">
+          Accessible: 94.2%
+        </text>
+      </g>
+
+      {/* Bottom Caption */}
+      <text
+        x="50"
+        y="93"
+        textAnchor="middle"
+        fontSize="3.0"
+        fill="var(--color-meta)"
+        fontFamily="'JetBrains Mono', monospace"
+      >
+        Feature matrix: TFBSs + GC richness + GC skew
+      </text>
+    </svg>
+  );
+}
+
+// ── S2 Scene 3: HEK293T Training & JASPAR GC% > 50% Filter ─────
+function S2_Scene3({ progress }: { progress: number }) {
+  const t = progress;
+
+  // JASPAR Motifs passing GC > 50% threshold
+  const jasparMotifs = [
+    { name: "SP1", gc: "78%", x: 8 },
+    { name: "E2F1", gc: "64%", x: 30 },
+    { name: "KLF4", gc: "71%", x: 52 },
+    { name: "EGR1", gc: "69%", x: 74 },
+  ];
+
+  return (
+    <svg viewBox="0 0 102 100" className="w-full h-full select-none">
+      {/* Top Track: Deeply Sequenced HEK293T ATAC Peaks */}
+      <g>
+        <rect x="5" y="6" width="92" height="28" fill="var(--color-tile)" stroke="var(--color-line)" strokeWidth="0.6" rx="2" />
+        <text x="9" y="12.5" fontSize="2.3" fill="var(--color-ink)" fontFamily="'JetBrains Mono', monospace" fontWeight="700">
+          HEK293T Deep ATAC-seq
+        </text>
+        <text x="93" y="12.5" textAnchor="end" fontSize="2.0" fill="var(--color-primary)" fontFamily="'JetBrains Mono', monospace">
+          Peak Ground Truth
+        </text>
+
+        {/* Peak Waveform Profile */}
+        <path
+          d="M 10 30 C 20 30, 24 25, 30 20 C 35 15, 37 15, 42 21 C 46 27, 49 30, 56 30 C 62 30, 65 20, 70 17 C 74 15, 78 27, 92 30"
+          fill="none"
+          stroke="var(--color-primary)"
+          strokeWidth="1.2"
+        />
+        {/* Peak summit callouts */}
+        <circle cx="36" cy="16" r="2.2" fill="#D4AC0D" />
+        <circle cx="72" cy="16" r="2.2" fill="#D4AC0D" />
+      </g>
+
+      {/* Middle Filter Funnel: JASPAR Vertebrate Database (GC% > 50%) */}
+      <g transform="translate(0, 3)" opacity={Math.min(t * 1.5, 1)}>
+        {/* Filter Box Header */}
+        <rect x="5" y="36" width="92" height="30" fill="var(--color-paper)" stroke="var(--color-primary)" strokeWidth="0.8" rx="2" />
+        <text x="9" y="42.5" fontSize="2.3" fill="var(--color-primary)" fontFamily="'JetBrains Mono', monospace" fontWeight="700">
+          JASPAR Vertebrate TFBSs
+        </text>
+        
+        {/* Filter Badge */}
+        <rect x="59" y="38.5" width="34" height="6" fill="#E67E22" rx="1" />
+        <text x="76" y="42.6" textAnchor="middle" fontSize="2.1" fill="#ffffff" fontFamily="'JetBrains Mono', monospace" fontWeight="700">
+          Filter: GC% &gt; 50%
+        </text>
+
+        {/* Passing Filtered TFBS Motifs */}
+        {jasparMotifs.map((m, idx) => (
+          <g key={`m-${idx}`} transform={`translate(${m.x}, 47)`}>
+            <rect x="0" y="0" width="18" height="14" fill="var(--color-tile)" stroke="var(--color-line)" strokeWidth="0.5" rx="1.2" />
+            <text x="9" y="6.2" textAnchor="middle" fontSize="2.4" fill="var(--color-ink)" fontFamily="'JetBrains Mono', monospace" fontWeight="700">
+              {m.name}
+            </text>
+            <text x="9" y="11" textAnchor="middle" fontSize="2.0" fill="var(--color-primary)" fontFamily="'JetBrains Mono', monospace" fontWeight="600">
+              GC: {m.gc} ✓
+            </text>
+          </g>
+        ))}
+      </g>
+
+      {/* Downstream Training Vector Pipeline */}
+      {t > 0.5 && (
+        <g opacity={Math.min((t - 0.5) * 2, 1)}>
+          <line x1="51" y1="70" x2="51" y2="76" stroke="var(--color-primary)" strokeWidth="0.8" strokeDasharray="1.5 1.5" />
+          <rect x="15" y="75.5" width="72" height="7.5" fill="var(--color-primary)" rx="1.5" />
+          <text x="51" y="80.2" textAnchor="middle" fontSize="2.4" fill="#ffffff" fontFamily="'JetBrains Mono', monospace" fontWeight="600">
+            Features Fed into Classifier Training
+          </text>
+        </g>
+      )}
+
+      {/* Bottom Caption */}
+      <text
+        x="51"
+        y="94"
+        textAnchor="middle"
+        fontSize="2.9"
+        fill="var(--color-meta)"
+        fontFamily="'JetBrains Mono', monospace"
+      >
+        HEK293T ATAC peaks + JASPAR vertebrate TFBSs (GC% &gt; 50%)
+      </text>
+    </svg>
+  );
+}
+
+// ── S2 Scene 4: Genome-Wide Prediction & Unusual Alu Abundance 
+function S2_Scene4({ progress }: { progress: number }) {
+  const t = progress;
+
+  // Genome-wide chromosome hotspots
+  const chroms = [
+    { chr: "chr1", peaks: [34, 52, 70, 88], y: 22 },
+    { chr: "chr7", peaks: [28, 46, 66, 84], y: 34 },
+    { chr: "chr19", peaks: [30, 48, 64, 80, 90], y: 46 },
+  ];
+
+  return (
+    <svg viewBox="0 0 102 100" className="w-full h-full select-none">
+      {/* Top Banner: Genome-Wide Prediction Tracks */}
+      <g>
+        <text x="6" y="13" fontSize="2.5" fill="var(--color-ink)" fontFamily="'JetBrains Mono', monospace" fontWeight="700">
+          Genome-Wide Predictions (hg38)
+        </text>
+
+        {chroms.map((c, ci) => (
+          <g key={`chr-${ci}`}>
+            {/* Chromosome Label */}
+            <text x="18" y={c.y + 1} textAnchor="end" fontSize="2.1" fill="var(--color-meta)" fontFamily="'JetBrains Mono', monospace">
+              {c.chr}
+            </text>
+            {/* Chromosome Backbone */}
+            <line x1="22" y1={c.y} x2="94" y2={c.y} stroke="var(--color-line)" strokeWidth="1.2" strokeLinecap="round" />
+            
+            {/* Predicted Open Chromatin Peaks */}
+            {c.peaks.map((px, pi) => (
+              <circle
+                key={`pk-${ci}-${pi}`}
+                cx={px}
+                cy={c.y}
+                r={1.8 + Math.sin(t * Math.PI + pi) * 0.3}
+                fill="var(--color-primary)"
+              />
+            ))}
+          </g>
+        ))}
+      </g>
+
+      {/* Locus Zoom-In Box: Alu Repeat Abundance Discovery */}
+      <g opacity={Math.min(t * 1.5, 1)}>
+        <rect x="5" y="55" width="92" height="28" fill="var(--color-tile)" stroke="#E67E22" strokeWidth="0.8" rx="2" />
+        
+        {/* Zoom Header */}
+        <text x="9" y="61.5" fontSize="2.2" fill="#E67E22" fontFamily="'JetBrains Mono', monospace" fontWeight="700">
+          Locus Discovery: Repeat Abundance
+        </text>
+        <text x="93" y="61.5" textAnchor="end" fontSize="2.0" fill="var(--color-body)" fontFamily="'JetBrains Mono', monospace">
+          Alu SINE Retrotransposons
+        </text>
+
+        {/* Baseline in Zoom Box */}
+        <line x1="9" y1="71" x2="93" y2="71" stroke="var(--color-line)" strokeWidth="0.8" />
+        
+        {/* 4 Clean Alu Elements Embedded */}
+        {[
+          { x: 9, w: 18, label: "Alu SINE" },
+          { x: 31, w: 18, label: "Alu Core" },
+          { x: 53, w: 18, label: "Alu Repeat" },
+          { x: 75, w: 18, label: "Alu-rich" },
+        ].map((alu, ai) => (
+          <g key={`alu-${ai}`}>
+            <rect x={alu.x} y="66.5" width={alu.w} height="7.5" fill="#E67E22" opacity="0.9" rx="1" />
+            <text x={alu.x + alu.w / 2} y="71.2" textAnchor="middle" fontSize="2.0" fill="#ffffff" fontFamily="'JetBrains Mono', monospace" fontWeight="700">
+              {alu.label}
+            </text>
+          </g>
+        ))}
+      </g>
+
+      {/* Bottom Caption */}
+      <text
+        x="51"
+        y="94"
+        textAnchor="middle"
+        fontSize="2.9"
+        fill="var(--color-meta)"
+        fontFamily="'JetBrains Mono', monospace"
+      >
+        Genome-wide predicted open chromatin driven by Alu repeats
+      </text>
+    </svg>
+  );
+}
+
+// ── S2 Scene 5: Evolutionary Lineage (Alu J -> S -> Y & 105 Vertebrates) 
+function S2_Scene5({ progress }: { progress: number }) {
+  const t = progress;
+
+  // Primate lineage Alu stratification & 105 vertebrates tree
+  const lineages = [
+    { name: "Humans & Great Apes", repeat: "Alu Y (Active)", color: "#E74C3C", y: 18 },
+    { name: "Monkeys (Old/New World)", repeat: "Alu S (Expansion)", color: "#E67E22", y: 32 },
+    { name: "Marsupials / Early Primates", repeat: "Alu J (Ancestral)", color: "#2980B9", y: 46 },
+    { name: "Jawless Fish to Mammals", repeat: "105 Vertebrates", color: "var(--color-primary)", y: 60 },
+  ];
+
+  return (
+    <svg viewBox="0 0 102 100" className="w-full h-full select-none">
+      {/* Phylogenetic Tree Backbone shifted left */}
+      <g opacity="0.65">
+        <path
+          d="M 6 60 H 11 V 46 H 15 V 32 H 18 V 18 H 22 M 15 46 H 22 M 11 60 H 22"
+          fill="none"
+          stroke="var(--color-line)"
+          strokeWidth="0.8"
+        />
+      </g>
+
+      {/* Lineages & Clade Stratification Badges */}
+      {lineages.map((lin, idx) => {
+        const rowT = Math.max(0, Math.min(1, (t - idx * 0.08) * 2));
         return (
-          <g key={i} opacity={0.2 + bt * 0.8}>
-            {/* Ancestral block */}
-            <rect x={b.x} y="26" width={b.w} height="4" fill={b.c} opacity="0.6" rx="0.5" />
+          <g key={`lin-${idx}`} opacity={0.25 + rowT * 0.75}>
+            {/* Branch Tip Node */}
+            <circle cx="22" cy={lin.y} r="2.0" fill={lin.color} />
 
-            {/* Connecting flow stream */}
-            <path
-              d={`M ${b.x} 30 L ${b.x} 60 L ${b.x + b.w} 60 L ${b.x + b.w} 30 Z`}
-              fill={b.c}
-              opacity={0.12 * bt}
-            />
-
-            {/* Modern block */}
-            <rect x={b.x} y="60" width={b.w} height="4" fill={b.c} opacity="0.9" rx="0.5" />
-
+            {/* Lineage Name */}
             <text
-              x={b.x + b.w / 2}
-              y="72"
-              textAnchor="middle"
-              fontSize="2.7"
+              x="26"
+              y={lin.y + 1}
+              fontSize="2.1"
               fill="var(--color-ink)"
               fontFamily="'JetBrains Mono', monospace"
+              fontWeight="600"
             >
-              {b.label}
+              {lin.name}
+            </text>
+
+            {/* Stratified Alu Family Badge on Far Right */}
+            <rect
+              x="66"
+              y={lin.y - 3.5}
+              width="31"
+              height="6.8"
+              fill={lin.color}
+              opacity="0.9"
+              rx="1.2"
+            />
+            <text
+              x="81.5"
+              y={lin.y + 0.9}
+              textAnchor="middle"
+              fontSize="1.9"
+              fill="#ffffff"
+              fontFamily="'JetBrains Mono', monospace"
+              fontWeight="700"
+            >
+              {lin.repeat}
             </text>
           </g>
         );
       })}
 
-      {/* Final insight callout */}
-      {t > 0.7 && (
-        <text
-          x="50"
-          y="88"
-          textAnchor="middle"
-          fontSize="4.5"
-          fill="var(--color-ink)"
-          fontFamily="var(--font-serif)"
-          fontStyle="italic"
-          opacity={Math.min((t - 0.7) * 3.5, 1)}
-        >
-          Deep evolutionary constraints on gene regulation
-        </text>
+      {/* Evolutionary Conclusion Callout */}
+      {t > 0.6 && (
+        <g opacity={Math.min((t - 0.6) * 2.5, 1)}>
+          <rect x="6" y="72" width="90" height="9" fill="var(--color-tile)" stroke="var(--color-line)" strokeWidth="0.5" rx="1.5" />
+          <text
+            x="51"
+            y="77.6"
+            textAnchor="middle"
+            fontSize="2.4"
+            fill="var(--color-primary)"
+            fontFamily="'JetBrains Mono', monospace"
+            fontWeight="700"
+          >
+            Evolutionary Grammar: Alu J → Alu S → Alu Y
+          </text>
+        </g>
       )}
+
+      {/* Bottom Caption */}
+      <text
+        x="51"
+        y="94"
+        textAnchor="middle"
+        fontSize="2.8"
+        fill="var(--color-meta)"
+        fontFamily="'JetBrains Mono', monospace"
+      >
+        Primate Alu stratification (J → S → Y) across 105 vertebrates
+      </text>
     </svg>
   );
 }
@@ -1530,37 +1694,37 @@ const stories = [
     scenes: [
       {
         id: "s2-chromatin",
-        mono: "01 · Chromatin accessibility",
-        title: "The open regulatory landscape",
-        body: "ATAC-seq and DNase-I sensitivity profiling map accessible DNA regions across the genome where nucleosomes unwind to expose regulatory elements.",
+        mono: "01 · ATAC-seq & Tn5 transposase",
+        title: "Transposition of open chromatin",
+        body: "Assay for Transposase-Accessible Chromatin (ATAC-seq) utilizes a hyperactive Tn5 transposase to probe regulatory DNA. The Tn5 homodimer selectively accesses and cleaves nucleosome-free, open chromatin regions, simultaneous tagging DNA fragments with sequencing adapters.",
         Component: S2_Scene1,
       },
       {
         id: "s2-tfbs",
-        mono: "02 · TF binding sites",
-        title: "Sequence motifs & protein footprints",
-        body: "High-resolution transcription factor binding footprints reveal specific motif syntax that dictates promoter and enhancer activation.",
+        mono: "02 · Feature engineering & machine learning",
+        title: "TFBS density, GC richness & GC skew",
+        body: "Open chromatin regions possess distinct sequence signatures: marked enrichment of transcription factor binding sites (TFBSs), elevated GC richness, and characteristic GC skew. We engineer these sequence properties into a multi-dimensional feature matrix to train a Random Forest classifier.",
         Component: S2_Scene2,
       },
       {
         id: "s2-rf",
-        mono: "03 · Random forest models",
-        title: "Predictive ensemble classification",
-        body: "Trained Random Forest decision ensembles integrate accessibility, sequence context, and TFBS density to identify active regulatory elements with high accuracy.",
+        mono: "03 · HEK293T training & JASPAR GC filter",
+        title: "High-resolution peaks & GC-rich motif filtering",
+        body: "Using deeply sequenced HEK293T ATAC-seq datasets, we call high-confidence accessibility peaks to define ground truth. Feature extraction is refined using vertebrate-wide JASPAR TFBS profiles, selectively filtering for high-GC motifs (GC% > 50%) to capture robust regulatory signals.",
         Component: S2_Scene3,
       },
       {
         id: "s2-evolution",
-        mono: "04 · Evolution across 105 species",
-        title: "Cross-species synteny & conservation",
-        body: "Multi-species genome alignments across 105 vertebrate species trace the evolutionary conservation of regulatory elements over hundreds of millions of years.",
+        mono: "04 · Genome-wide prediction & repeats",
+        title: "Alu retrotransposon abundance in open chromatin",
+        body: "Deploying predictions genome-wide uncovered the sequence basis of chromatin accessibility: an extraordinary abundance of repeat elements. Predicted open chromatin regions are uniquely enriched in primate Alu retrotransposons, revealing that transposable elements actively shape the open regulatory landscape.",
         Component: S2_Scene4,
       },
       {
         id: "s2-insight",
-        mono: "05 · Evolutionary grammar",
-        title: "Deep constraints on gene regulation",
-        body: "Evolutionary conservation scores uncover fundamental regulatory constraints — identifying conserved genomic grammar essential for organismal survival.",
+        mono: "05 · Evolutionary trajectory across 105 vertebrates",
+        title: "Alu lineage stratification & vertebrate evolution",
+        body: "Evolutionary analysis reveals a chronological stratification of repeat families in primates: ancestral Alu J in early lineages, Alu S expansion in Old/New World monkeys, and young Alu Y in Great Apes and Humans. Extending this predictive framework across 105 vertebrates — from jawless fish to mammals — maps the deep evolutionary rules of genome regulation.",
         Component: S2_Scene5,
       },
     ],
