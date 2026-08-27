@@ -6,7 +6,7 @@ const navLinks = [
   { label: "Research", href: "#research-story" },
   { label: "About",    href: "#about" },
   { label: "Publications", href: "#publications" },
-  { label: "Talks",    href: "#talks" },
+  { label: "Conferences", href: "#talks" },
   { label: "Contact",  href: "#contact" },
 ];
 

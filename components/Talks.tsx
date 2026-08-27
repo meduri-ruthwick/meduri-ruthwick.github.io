@@ -1,45 +1,27 @@
 "use client";
 
-type Talk = {
-  id: string; title: string; conference: string; location: string;
-  year: number; type: "invited" | "contributed" | "poster";
-  slidesUrl?: string; videoUrl?: string;
+type Conference = {
+  id: string;
+  title: string;
+  conference: string;
+  location: string;
+  year: number;
+  role: string;
+  description: string;
 };
 
-const talks: Talk[] = [
+const conferences: Conference[] = [
   {
-    id: "t1",
-    title: "Core promoter architecture shapes tissue-specificity in CAGE-defined TSS",
-    conference: "[Conference — e.g. RECOMB 2024]",
-    location: "Cambridge, MA",
-    year: 2024,
-    type: "contributed",
-    slidesUrl: "#",
-    videoUrl: "#",
-  },
-  {
-    id: "t2",
-    title: "Denoising autoencoders for robust regulatory signal extraction from CAGE-seq",
-    conference: "[Conference — e.g. ISMB 2023]",
-    location: "Lyon, France",
+    id: "c1",
+    title: "Annual Conference of the Indian Society of Human Genetics (ISHG 2023)",
+    conference: "Indian Society of Human Genetics",
+    location: "Ahmedabad, India",
     year: 2023,
-    type: "contributed",
-    slidesUrl: "#",
-  },
-  {
-    id: "t3",
-    title: "Single-cell CAGE reveals temporal promoter activation during differentiation",
-    conference: "[Symposium — e.g. Keystone 2023]",
-    location: "Virtual",
-    year: 2023,
-    type: "poster",
-    slidesUrl: "#",
+    role: "Delegate",
+    description:
+      "Attended as an academic delegate, engaging with researchers on human genome variation, clinical genomics, and regulatory biology.",
   },
 ];
-
-const typeLabel: Record<string, string> = {
-  invited: "Invited", contributed: "Talk", poster: "Poster",
-};
 
 export default function Talks() {
   return (
@@ -50,59 +32,50 @@ export default function Talks() {
           <p className="text-primary" style={{
             fontFamily: "var(--font-mono)", fontSize: "11px",
             textTransform: "uppercase", letterSpacing: "0.25em", marginBottom: "0.5rem",
-          }}>Presentations</p>
+          }}>Academic Engagement</p>
           <h2 style={{
             fontFamily: "var(--font-sans)", fontWeight: 500,
             fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
             letterSpacing: "-0.03em", color: "var(--color-ink)",
-          }}>Talks &amp; Posters</h2>
+          }}>Conferences &amp; Meetings</h2>
         </div>
 
         {/* List */}
         <div style={{ maxWidth: "48rem", display: "flex", flexDirection: "column" }}>
-          {talks.map((talk) => (
-            <div key={talk.id} className="pub-card" id={`talk-${talk.id}`}>
+          {conferences.map((conf) => (
+            <div key={conf.id} className="pub-card" id={`conf-${conf.id}`}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
                 <span style={{
                   fontFamily: "var(--font-mono)", fontSize: "10px",
                   textTransform: "uppercase", letterSpacing: "0.15em",
                   color: "var(--color-primary)",
+                  backgroundColor: "var(--color-tile)",
+                  padding: "0.2rem 0.5rem",
+                  borderRadius: "3px",
+                  border: "1px solid var(--color-line)",
                 }}>
-                  {typeLabel[talk.type]}
+                  {conf.role}
                 </span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--color-whisper)" }}>
-                  {talk.year}
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--color-meta)" }}>
+                  {conf.year}
                 </span>
               </div>
 
               <h3 style={{
-                fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: "1.05rem",
+                fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: "1.1rem",
                 letterSpacing: "-0.01em", lineHeight: 1.4,
                 color: "var(--color-ink)", marginBottom: "0.4rem",
               }}>
-                {talk.title}
+                {conf.title}
               </h3>
 
-              <p className="text-meta" style={{ fontFamily: "var(--font-sans)", fontSize: "13px" }}>
-                {talk.conference} · {talk.location}
+              <p className="text-meta" style={{ fontFamily: "var(--font-sans)", fontSize: "13.5px", marginBottom: "0.5rem" }}>
+                {conf.conference} · {conf.location}
               </p>
 
-              <div style={{ display: "flex", gap: "1.25rem", marginTop: "0.75rem" }}>
-                {talk.slidesUrl && (
-                  <a href={talk.slidesUrl} target="_blank" rel="noopener noreferrer"
-                    className="text-meta hover-primary"
-                    style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textDecoration: "none", letterSpacing: "0.05em" }}>
-                    Slides →
-                  </a>
-                )}
-                {talk.videoUrl && (
-                  <a href={talk.videoUrl} target="_blank" rel="noopener noreferrer"
-                    className="text-meta hover-primary"
-                    style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textDecoration: "none", letterSpacing: "0.05em" }}>
-                    Video →
-                  </a>
-                )}
-              </div>
+              <p className="text-body" style={{ fontFamily: "var(--font-sans)", fontSize: "14px", lineHeight: "1.6", color: "var(--color-body)" }}>
+                {conf.description}
+              </p>
             </div>
           ))}
         </div>
