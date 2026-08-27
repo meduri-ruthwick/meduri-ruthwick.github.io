@@ -80,22 +80,21 @@ export default function Contact() {
           }}>
             Let&apos;s talk<br />
             <em style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontStyle: "italic", color: "var(--color-primary)" }}>
-              genomics
+              science & genomics
             </em>
           </h2>
           <p className="text-body" style={{ fontFamily: "var(--font-sans)", fontSize: "15px", lineHeight: "1.7", maxWidth: "26rem", textWrap: "pretty" }}>
-            Happy to discuss collaborations, research questions, or career opportunities.
-            Reach out through any of the channels below.
+            Always happy to engage in scientific conversations, explore interdisciplinary research collaborations, discuss novel hypotheses in regulatory and viral genomics, or discuss prospective career opportunities. Reach out through any of the channels beside.
           </p>
 
           {/* CV */}
           <div style={{ marginTop: "2.5rem", borderTop: "1px solid var(--color-line)", paddingTop: "1.5rem" }}>
             <p className="text-meta" style={{ fontFamily: "var(--font-sans)", fontSize: "13px", marginBottom: "0.75rem" }}>
-              Download my full curriculum vitae
+              Download my full academic curriculum vitae
             </p>
             <a
-              href="/cv.pdf"
-              download
+              href="/Ruthwick_Meduri_CV.pdf"
+              download="Ruthwick_Meduri_CV.pdf"
               id="contact-cv-download"
               style={{
                 display: "inline-flex", alignItems: "center", gap: "0.5rem",

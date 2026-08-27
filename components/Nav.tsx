@@ -111,7 +111,7 @@ export default function Nav() {
               {l.label}
             </a>
           ))}
-          <a href="/cv.pdf" download className="text-meta" style={{ fontSize: "14px" }}>
+          <a href="/Ruthwick_Meduri_CV.pdf" download="Ruthwick_Meduri_CV.pdf" className="text-meta hover-primary" style={{ fontSize: "14px" }}>
             Download CV
           </a>
         </div>
